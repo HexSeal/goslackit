@@ -1,23 +1,29 @@
 package main
 
 import (
+	"fmt"
 	"os"
-	"net/http"
-
-	"github.com/droxey/goslackit/slack"
-	_ "github.com/joho/godotenv/autoload"
+	"github.com/slack-go/slack"
 )
 
-// main is our entrypoint, where the application initializes the Slackbot.
 func main() {
-	port := ":" + os.Getenv("PORT")
-	go http.ListenAndServe(port, nil)
-	slackIt()
-}
+	api := os.Getenv("BOT_OAUTH_ACCESS_TOKEN")
+	// If you set debugging, it will log all requests to the console
+	// Useful when encountering issues
+	// slack.New("YOUR_TOKEN_HERE", slack.OptionDebug(true))
+	groups, err := api.GetGroups(false)
+	if err != nil {
+		fmt.Printf("%s\n", err)
+		return
+	}
+	for _, group := range groups {
+		fmt.Printf("ID: %s, Name: %s\n", group.ID, group.Name)
+	}
 
-// slackIt is a function that initializes the Slackbot.
-func slackIt() {
-	botToken := os.Getenv("BOT_OAUTH_ACCESS_TOKEN")
-	slackClient := slack.CreateSlackClient(botToken)
-	slack.RespondToEvents(slackClient)
+    user, err := api.GetUserInfo("U023BECGF")
+    if err != nil {
+		fmt.Printf("%s\n", err)
+		return
+    }
+    fmt.Printf("ID: %s, Fullname: %s, Email: %s\n", user.ID, user.Profile.RealName, user.Profile.Email)
 }
